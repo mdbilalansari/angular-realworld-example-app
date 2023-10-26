@@ -17,6 +17,9 @@
 *.launch
 .settings/
 *.sublime-workspace
+.prettierrc
+cypress.env.json
+
 
 # IDE - VSCode
 .vscode/*

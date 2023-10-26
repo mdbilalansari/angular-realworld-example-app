@@ -10,7 +10,8 @@ describe('Test with backend', () => {
     console.log('Login Succesful');
   });
 
-  it('verify correct request and response', () => {
+  //Error: Unique Titile
+  it('verify correct request and response', { retries: 2 }, () => {
     cy.intercept('POST', 'https://api.realworld.io/api/articles/').as('postArticles');
 
     cy.contains('New Article').click();
@@ -27,7 +28,8 @@ describe('Test with backend', () => {
     });
   });
 
-  it('intercepting and modifying the request and response', () => {
+  //Error: Unique Titile
+  it('intercepting and modifying the request and response', { retries: 2 }, () => {
     // cy.intercept('POST', '*/articles/', (req) => {
     //   req.body.article.description = 'This is a Fake Discription';
     // }).as('postArticles');

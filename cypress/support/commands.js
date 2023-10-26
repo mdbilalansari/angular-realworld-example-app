@@ -39,12 +39,12 @@
 Cypress.Commands.add('loginToApplication', () => {
   const userCredential = {
     user: {
-      email: 'mdbilalansari@gmail.com',
-      password: 'Password@123',
+      email: Cypress.env('username'),
+      password: Cypress.env('password'),
     },
   };
 
-  cy.request('POST', 'https://api.realworld.io/api/users/login', userCredential)
+  cy.request('POST', `${Cypress.env('apiUrl')}/api/users/login`, userCredential)
     .its('body')
     .then((body) => {
       const token = body.user.token;
@@ -55,9 +55,4 @@ Cypress.Commands.add('loginToApplication', () => {
         },
       });
     });
-
-  // cy.visit('/login');
-  // cy.get('[placeholder="Email"]').type('mdbilalansari@gmail.com');
-  // cy.get('[placeholder="Password"]').type('Password@123');
-  // cy.get('form').submit();
 });

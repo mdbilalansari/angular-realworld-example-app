@@ -1,5 +1,7 @@
 /// <reference types="cypress" />
 
+const { hasJSDocParameterTags } = require('typescript');
+
 describe('Test with backend', () => {
   beforeEach('login to the app', () => {
     cy.intercept('GET', 'https://api.realworld.io/api/tags', { fixture: 'tags.json' });

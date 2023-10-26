@@ -36,9 +36,28 @@
 //   }
 // }
 
-Cypress.Commands.add("loginToApplication", () => {
-  cy.visit("/login");
-  cy.get('[placeholder="Email"]').type("mdbilalansari@gmail.com");
-  cy.get('[placeholder="Password"]').type("Password@123");
-  cy.get("form").submit();
+Cypress.Commands.add('loginToApplication', () => {
+  const userCredential = {
+    user: {
+      email: 'mdbilalansari@gmail.com',
+      password: 'Password@123',
+    },
+  };
+
+  cy.request('POST', 'https://api.realworld.io/api/users/login', userCredential)
+    .its('body')
+    .then((body) => {
+      const token = body.user.token;
+      cy.wrap(token).as('token');
+      cy.visit('/', {
+        onBeforeLoad(win) {
+          win.localStorage.setItem('jwtToken', token);
+        },
+      });
+    });
+
+  // cy.visit('/login');
+  // cy.get('[placeholder="Email"]').type('mdbilalansari@gmail.com');
+  // cy.get('[placeholder="Password"]').type('Password@123');
+  // cy.get('form').submit();
 });

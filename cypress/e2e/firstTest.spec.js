@@ -14,7 +14,7 @@ describe('Test with backend', () => {
     cy.intercept('POST', 'https://api.realworld.io/api/articles/').as('postArticles');
 
     cy.contains('New Article').click();
-    cy.get('[formcontrolname="title"]').type('Title of the Article');
+    cy.get('[formcontrolname="title"]').type('Title of the Article 1234');
     cy.get('[formcontrolname="description"]').type('Description of the Article');
     cy.get('[formcontrolname="body"]').type('This is a body of the Article.');
     cy.contains('Publish Article').click();
@@ -27,7 +27,7 @@ describe('Test with backend', () => {
     });
   });
 
-  it.only('intercepting and modifying the request and response', () => {
+  it('intercepting and modifying the request and response', () => {
     // cy.intercept('POST', '*/articles/', (req) => {
     //   req.body.article.description = 'This is a Fake Discription';
     // }).as('postArticles');
@@ -40,7 +40,7 @@ describe('Test with backend', () => {
     }).as('postArticles');
 
     cy.contains('New Article').click();
-    cy.get('[formcontrolname="title"]').type('Title of the Article');
+    cy.get('[formcontrolname="title"]').type('Title of the Article 12345');
     cy.get('[formcontrolname="description"]').type('Description of the Article');
     cy.get('[formcontrolname="body"]').type('This is a body of the Article.');
     cy.contains('Publish Article').click();
@@ -79,6 +79,43 @@ describe('Test with backend', () => {
 
       cy.intercept('POST', 'https://api.realworld.io/api/articles/' + articleLinnk + '/favorite', file);
       cy.get('app-article-list button').eq(1).click().should('contain', '6');
+    });
+  });
+
+  it('delete a new article in glabal feed', () => {
+    const bodyRequest = {
+      article: {
+        title: 'Title of the article Hello 123',
+        description: 'Description 129',
+        body: 'Hello WOrld!',
+        tagList: [],
+      },
+    };
+
+    cy.get('@token').then((token) => {
+      cy.request({
+        url: 'https://api.realworld.io/api/articles',
+        headers: { Authorization: 'Token ' + token },
+        method: 'POST',
+        body: bodyRequest,
+      }).then((response) => {
+        expect(response.status).to.equal(201);
+      });
+
+      cy.contains('Global Feed').click();
+      cy.get('.preview-link').first().click();
+      cy.get('.article-actions').contains('Delete Article').click();
+
+      cy.request({
+        url: 'https://api.realworld.io/api/articles?limit=10&offset=0',
+        header: { Authorization: 'Token ' + token },
+        method: 'GET',
+      })
+        .its('body')
+        .then((body) => {
+          console.log(body);
+          expect(body.articles[0].title).not.to.equal('Title of the article 01');
+        });
     });
   });
 });

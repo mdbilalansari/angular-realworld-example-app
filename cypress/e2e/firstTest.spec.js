@@ -2,7 +2,7 @@
 
 describe('Test with backend', () => {
   beforeEach('login to the app', () => {
-    cy.intercept('GET', 'https://api.realworld.io/api/tags', { fixture: 'tags.json' });
+    cy.intercept({ method: 'GET', path: 'tags' }, { fixture: 'tags.json' });
     cy.loginToApplication();
   });
 
@@ -27,6 +27,32 @@ describe('Test with backend', () => {
     });
   });
 
+  it.only('intercepting and modifying the request and response', () => {
+    // cy.intercept('POST', '*/articles/', (req) => {
+    //   req.body.article.description = 'This is a Fake Discription';
+    // }).as('postArticles');
+
+    cy.intercept('POST', '*/articles/', (req) => {
+      req.reply((res) => {
+        expect(res.body.article.description).to.equal('Description of the Article');
+        res.body.article.description = 'This is a Fake Discription';
+      });
+    }).as('postArticles');
+
+    cy.contains('New Article').click();
+    cy.get('[formcontrolname="title"]').type('Title of the Article');
+    cy.get('[formcontrolname="description"]').type('Description of the Article');
+    cy.get('[formcontrolname="body"]').type('This is a body of the Article.');
+    cy.contains('Publish Article').click();
+
+    cy.wait('@postArticles').then((xhr) => {
+      console.log(xhr);
+      expect(xhr.response.statusCode).to.equal(201);
+      expect(xhr.request.body.article.body).to.equal('This is a body of the Article.');
+      expect(xhr.response.body.article.description).to.equal('This is a Fake Discription');
+    });
+  });
+
   it('verify popular tags are displayed', () => {
     cy.get('.tag-list')
       .should('contain', 'welcome')
@@ -37,7 +63,7 @@ describe('Test with backend', () => {
       .and('contain', 'Fun');
   });
 
-  it.only('verify global feed likes count', () => {
+  it('verify global feed likes count', () => {
     cy.intercept('GET', 'https://api.realworld.io/api/articles/feed*', { articles: [], articlesCount: 0 });
     cy.intercept('GET', 'https://api.realworld.io/api/articles*', { fixture: 'articles.json' });
 
